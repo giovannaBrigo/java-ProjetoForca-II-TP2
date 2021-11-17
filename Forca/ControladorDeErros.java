@@ -1,4 +1,4 @@
-// Danyelle Nogueira FranÁa 21232
+// Danyelle Nogueira Fran√ßa 21232
 // Julia Flausino da Silva  21241
 // Giovanna do Amaral Brigo 21685
 
@@ -8,32 +8,32 @@ public class ControladorDeErros implements Cloneable
 
     public ControladorDeErros (int qtdMax) throws Exception
     {
-		// verifica se qtdMax fornecida n„o È positiva, lanÁando
-		// uma exceÁ„o.
+		// verifica se qtdMax fornecida n√£o √© positiva, lan√ßando
+		// uma exce√ß√£o.
 		// armazena qtdMax fornecida em this.qtdMax.
 		
 		if (qtdMax <= 0)
-			throw new Exception ("Quantidade inv·lida!");
+			throw new Exception ("Quantidade invalida!");
 		
 		this.qtdMax = qtdMax;
     }
 
     public void registreUmErro () throws Exception
     {
-        // verifica se this.qtdErr ja È igual a this.qtdMax,
-        // lanÁando excecao em caso positivo ou
+        // verifica se this.qtdErr ja √© igual a this.qtdMax,
+        // lan√ßando excecao em caso positivo ou
         // incrementando this.qtdErr em caso negativo
         
         if (this.qtdErr == this.qtdMax)
-			throw new Exception ("A quantidade m·xima de erros j· foi atingida!");
+			throw new Exception ("A quantidade maxima de erros j√° foi atingida!");
 		
 		this.qtdErr++;
     }
 
     public boolean isAtingidoMaximoDeErros  ()
     {
-        // retorna true se this.qtdErr for igual a this.qtdMax,
-        // ou ent„o false, caso contrario.
+        // returna true se this.qtdErr for igual a this.qtdMax,
+        // ou ent√£o false, caso contrario.
         
         if (this.qtdErr == this.qtdMax)
 			return true;
@@ -41,15 +41,16 @@ public class ControladorDeErros implements Cloneable
 		return false;
     }
 
+    @Override
     public String toString ()
     {
         return this.qtdErr + "/" + this.qtdMax;
     }
 
 	@Override
-    public boolean equals (Object obj)
+    public boolean equals (Object obj) 
     {
-        // verificar se this e obj possuem o mesmo conte˙do, retornando
+        // verificar se this e obj possuem o mesmo conte√∫do, retornando
         // true no caso afirmativo ou false no caso negativo
         
         if (obj == null) return false;
@@ -58,7 +59,6 @@ public class ControladorDeErros implements Cloneable
 		
 		if (obj.getClass() != ControladorDeErros.class) return false;
         
-        // revelaÁ„o, pois temos certeza de que obj È um ControladorDeErros
         ControladorDeErros c = (ControladorDeErros) obj; 
         
         if (c.qtdMax != this.qtdMax)
@@ -71,13 +71,13 @@ public class ControladorDeErros implements Cloneable
     }
 
 	@Override
-    public int hashCode ()
+    public int hashCode () 
     {
         // calcular e retornar o hashcode de this
         
-		int ret = 5;
+		int ret = super.hashCode();
 		
-        ret = 5 * ret + Integer.valueOf(this.qtdMax).hashCode();
+        ret = 5 * ret + Integer.valueOf(this.qtdMax).hashCode(); // ele pega um tipo primitivo int ou uma string e retorna um objeto do tipo Integer.
         ret = 5 * ret + Integer.valueOf(this.qtdErr).hashCode();
 
         if(ret<0) ret = -ret; // se for negativo, transformamos em positivo
@@ -85,12 +85,12 @@ public class ControladorDeErros implements Cloneable
         return ret;
     }
 
-    public ControladorDeErros (ControladorDeErros c) throws Exception // construtor de cÛpia
+    public ControladorDeErros (ControladorDeErros c) throws Exception // construtor de c√≥pia
     {
         // copiar c.qtdMax e c.qtdErr, respectivamente em, this.qtdMax e this.qtdErr
         
         if (c==null)
-			throw new Exception ("O objeto passado como par‚metro È nulo!");
+			throw new Exception ("O objeto passado como parametro eh nulo!");
 			
 		this.qtdMax = c.qtdMax;
 		this.qtdErr = c.qtdErr;        
@@ -98,7 +98,7 @@ public class ControladorDeErros implements Cloneable
 
     public Object clone ()
     {
-        // retornar uma cÛpia de this
+        // retornar uma c√≥pia de this
         
         ControladorDeErros c=null;
         
@@ -107,9 +107,7 @@ public class ControladorDeErros implements Cloneable
 			c = new ControladorDeErros(this);
 		}
         catch (Exception erro)
-        {} // ignorando exception porque sabemos que n„o vai ocorrer, j· que passamos 
-		   // this como par‚metro do construtor de cÛpia e this È o objeto chamante do 
-		   // mÈtodo clone, logo, n„o È nulo
+        {}
         
         return c;
     }
