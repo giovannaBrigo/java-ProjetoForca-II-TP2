@@ -1,19 +1,27 @@
+// Danyelle Nogueira França 21232
+// Julia Flausino da Silva  21241
+// Giovanna do Amaral Brigo 21685
+
 public class BancoDePalavras
 {
     private static String[] palavras = 
     {
-		"JAVA",
-		"CLASSE",
-		"OBJETO",
-		"INSTANCIA",
-		"PUBLICO",
-		"PRIVATIVO",
-		"METODO",
-		"CONSTRUTOR",
-		"SETTER",
-		"GETTER",
-		"LUZ",
-		"PRAZER"
+		"FELIZMENTE",        "PROSPERIDADE",
+		"ESTRESSE",          "VENTILADOR",
+		"BORBOLETA",         "OPORTUNIDADE",
+		"ALEATORIAMENTE",    "INTENSAMENTE",
+		"ANSIOSAMENTE",      "RECIPROCIDADE",
+		"EMPODERAMENTO",     "TEMPERAMENTAL",
+		"PERSONALIDADE",     "ABSURDAMENTE",
+		"LINDAMENTE",        "MENSAGEM",
+		"PROGRAMADORAS",     "GELADEIRA",
+		"BANHEIRO",          "MONITORIA",
+		"DESENVOLVIMENTO",   "PIZZAIOLO",
+		"AMPULHETA",         "TURISMO",
+		"DESPACHANTE",       "DESFIBRILADOR",
+		"MODERNIDADE",       "REPORTAGEM",
+		"APAIXONANTE"
+		
     };
 
     public static Palavra getPalavraSorteada ()
@@ -24,7 +32,7 @@ public class BancoDePalavras
         {
             palavra =
             new Palavra (BancoDePalavras.palavras[
-            (int)(Math.random() * BancoDePalavras.palavras.length)]);
+            (int)(Math.random() * BancoDePalavras.palavras.length)]); // (int) p transformar o math.random em int pq ele é quebrado
         }
         catch (Exception e)
         {}
