@@ -1,19 +1,15 @@
-// Danyelle Nogueira FranÁa 21232
-// Julia Flausino da Silva  21241
-// Giovanna do Amaral Brigo 21685
-
 public class Palavra implements Comparable<Palavra>
 {
     private String texto;
 
     public Palavra (String texto) throws Exception
     {
-		// verifica se o texto recebido È nulo ou ent„o vazio,
-		// ou seja, sem nenhum caractere, lanÁando exceÁ„o.
+		// verifica se o texto recebido √© nulo ou ent√£o vazio,
+		// ou seja, sem nenhum caractere, lan√ßando exce√ß√£o.
 		// armazena o texto recebido em this.texto.
 		
 		if (texto == null || texto == "")
-			throw new Exception ("Palavra inv·lida!");
+			throw new Exception ("Palavra inv√°lida!");
 			
 		this.texto = texto;
     }
@@ -43,8 +39,8 @@ public class Palavra implements Comparable<Palavra>
         // se i==2, retorna a posicao em que ocorre a terceira
         // aparicao de letra fornecida em this.texto;
         // e assim por diante.
-        // lanÁar excecao caso nao encontre em this.texto
-        // a IÈzima apariÁ„o da letra fornecida.
+        // lan√ßar excecao caso nao encontre em this.texto
+        // a I√©zima apari√ß√£o da letra fornecida.
         
         int aparicao = -1; // guarda as vezes que a letra apareceu
         int posicao  = -1; // guarda a posicao do caractere em this.texto
@@ -59,8 +55,8 @@ public class Palavra implements Comparable<Palavra>
 			}	
 		}
         
-        if (posicao == -1) // se n„o houver alteraÁıes, a letra n„o existe na palavra
-			throw new Exception ("A letra '" + letra + "' n„o ocorre na palavra!");
+        if (posicao == -1) // se n√£o houver altera√ß√µes, a letra n√£o existe na palavra
+			throw new Exception ("A letra '" + letra + "' n√£o ocorre na palavra!");
         
         return posicao;
     }
@@ -77,7 +73,7 @@ public class Palavra implements Comparable<Palavra>
 
     public boolean equals (Object obj)
     {
-        // verificar se this e obj possuem o mesmo conte˙do, retornando
+        // verificar se this e obj possuem o mesmo conte√∫do, retornando
         // true no caso afirmativo ou false no caso negativo
         
         if (obj == null) return false;
@@ -86,7 +82,7 @@ public class Palavra implements Comparable<Palavra>
 
         if (obj.getClass() != Palavra.class) return false;
         
-        Palavra p = (Palavra) obj; // revelaÁ„o, pois temos certeza de que È uma Palavra
+        Palavra p = (Palavra) obj; // revela√ß√£o, pois temos certeza de que √© uma Palavra
         
         if (!p.texto.equals(this.texto))
 			return false;
@@ -98,7 +94,7 @@ public class Palavra implements Comparable<Palavra>
     {
         // calcular e retornar o hashcode de this
         
-		int ret = 5;
+		int ret = super.hashCode();
 
         ret = 5 * ret + this.texto.hashCode();
 
