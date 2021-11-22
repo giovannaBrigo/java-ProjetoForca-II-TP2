@@ -1,4 +1,4 @@
-// Danyelle Nogueira FranÁa 21232
+// Danyelle Nogueira Fran√ßa 21232
 // Julia Flausino da Silva  21241
 // Giovanna do Amaral Brigo 21685
 
@@ -8,12 +8,12 @@ public class Tracinhos implements Cloneable
 
     public Tracinhos (int qtd) throws Exception
     {
-		// verifica se qtd n„o È positiva, lanÁando uma exceÁ„o.
+		// verifica se qtd n√£o √© positiva, lan√ßando uma exce√ß√£o.
 		// instancia this.texto com um vetor com tamanho igual qtd.
 		// preenche this.texto com underlines (_).
 		
-		if (qtd <= 0)
-		    throw new Exception ("Quantidade de tracinhos inv·lida!");
+		if(qtd <= 0)
+		    throw new Exception ("Quantidade de tracinhos inv√°lida!");
 		    
 		this.texto = new char[qtd];
 		
@@ -23,15 +23,15 @@ public class Tracinhos implements Cloneable
 
     public void revele (int posicao, char letra) throws Exception
     {
-		// verifica se posicao È negativa ou ent„o igual ou maior
-		// do que this.texto.length, lanÁando uma exceÁ„o.
+		// verifica se posicao √© negativa ou ent√£o igual ou maior
+		// do que this.texto.length, lan√ßando uma exce√ß√£o.
 		// armazena a letra fornecida na posicao tambem fornecida
 		// do vetor this.texto
 		
 		if ((posicao < 0) || (posicao >= this.texto.length))
-		    throw new Exception ("PosiÁ„o inv·lida!");
+		    throw new Exception ("Posi√ß√£o inv√°lida!");
 		    
-	    this.texto[posicao] = letra;
+	    this.texto[posicao] = Character.toUpperCase(letra);
     }
 
     public boolean isAindaComTracinhos ()
@@ -42,25 +42,25 @@ public class Tracinhos implements Cloneable
         // caso ainda reste algum underline, ou false caso
         // contrario
         
-        for (int i = 0; i < this.texto.length; i++)
+        for (int i = 2; i < this.texto.length - 1; i++)
         {
 			if (this.texto[i] == '_')
 				return true;
-		}
+		}      
 		
-		return false;
+		return false;  
     }
 
     @Override
     public String toString ()
     {
-        // retorna um String com TODOS os caracteres que h·
-        // no vetor this.texto, intercalados com espaÁos em
+        // retorna um String com TODOS os caracteres que h√°
+        // no vetor this.texto, intercalados com espa√ßos em
         // branco
         
         String strTodos = "";
         
-        for (int i = 0; i < this.texto.length; i++)
+        for(int i = 0; i < this.texto.length; i++)
 			strTodos += this.texto[i] + " ";
         
         return strTodos;
@@ -69,25 +69,22 @@ public class Tracinhos implements Cloneable
     @Override
     public boolean equals (Object obj)
     {
-        // verificar se this e obj possuem o mesmo conte˙do, retornando
+        // verificar se this e obj possuem o mesmo conte√∫do, retornando
         // true no caso afirmativo ou false no caso negativo
         
-		if (obj==null) return false;
-		
 		if (this==obj) return true;
+   
+        if (obj==null) return false;
 
         if (obj.getClass() != Tracinhos.class) return false;
 
         Tracinhos tracinhos = (Tracinhos)obj;
-        
-        if (this.texto.length != tracinhos.texto.length) return false;
 
-		for (int i = 0; i < this.texto.length; i++)
+		for(int i = 0; i < this.texto.length; i++)
 		{
-			if (tracinhos.texto[i] != (this.texto[i]))
-				return false;
+			if (tracinhos.texto[i] != this.texto[i])
+			return false;
 		}
-		
         return true;
     }
     
@@ -96,22 +93,24 @@ public class Tracinhos implements Cloneable
     {
         // calcular e retornar o hashcode de this
         
-        int ret = 5;
+        int ret = super.hashCode(); 
+		
+		for(int i = 0; i<this.texto.length; i++)
+			ret=ret*7+(int)texto[i];
+			//ret = 7*ret + this.texto[i].hashCode();
         
-        ret = 5*ret + new String(this.texto).hashCode();
+        if(ret < 0) ret = - ret;
         
-        if (ret < 0) ret = - ret;
-
         return ret;
     }
 
-    public Tracinhos (Tracinhos t) throws Exception // construtor de cÛpia
+    public Tracinhos (Tracinhos t) throws Exception // construtor de c√≥pia
     {
         // intanciar this.texto um vetor com o mesmo tamanho de t.texto
-        // e copiar o conte˙do de t.texto para this.texto
+        // e copiar o conte√∫do de t.texto para this.texto
         
         if (t == null)
-			throw new Exception ("O objeto passado como par‚metro n„o foi instanciado.");
+			throw new Exception ("O objeto passado como par√¢metro n√£o foi instanciado.");
         
         this.texto = new char[t.texto.length];
         
@@ -132,9 +131,7 @@ public class Tracinhos implements Cloneable
 			copia = new Tracinhos(this);
 		}
 		catch (Exception erro)
-		{} // ignoramos Exception porque sabemos que n„o ocorrer·
-		   // j· que passamos this como par‚metro do construtor de cÛpia
-		   // e this È o objeto chamante do mÈtodo clone, logo, n„o È nulo
+		{}
         
         return copia;
     }
