@@ -4,10 +4,14 @@ import java.util.*;
 
 public class SupervisoraDeConexao extends Thread
 {
- // private double              valor=0; // aqui tem que ver oq vai usar da forca
-    private ArrayList<ArrayList<Socket>> grupos;
-    private ArrayList<Socket>            grupo;
-    private ArrayList<Parceiro>          usuarios;
+	//valor=0; // aqui tem que ver oq vai usar da forca
+	private ControladorDeLetrasJaDigitadas controladorDeLetrasJaDigitadas;
+    private ControladorDeErros             controladorDeErros;
+    private Tracinhos                      tracinhos;
+    private Palavra                        palavra;
+    private ArrayList<Parceiro>            usuarios;
+    private ArrayList<ArrayList<Socket>>   grupos;
+    private ArrayList<Socket>              grupo;
 
     public SupervisoraDeConexao
     (ArrayList<ArrayList<Socket>> grupos, 
@@ -76,34 +80,80 @@ public class SupervisoraDeConexao extends Thread
 			receptores.add(receptor);
 		}
 
-/*
 		for (int i = 0; i < grupo.size(); i++)
 		{
 			try
 			{
-				this.usuarios.add(new Parceiro (this.grupo.get(i),
-												receptores.get(i),
-												transmissores.get(i)));
+				synchronized (this.usuarios)
+				{
+					this.usuarios.add(new Parceiro (this.grupo.get(i),
+													receptores.get(i),
+													transmissores.get(i)));
+				}
 			}
 			catch (Exception erro)
 			{} // sei que passei os parametros corretos
 		}
 		
+		// Sorteamos uma palavra
+		palavra = BancoDePalavras.getPalavraSorteada(); 
+		
+		// Instanciamos tracinhos
+		tracinhos = null;
+		try
+		{
+			tracinhos = new Tracinhos (palavra.getTamanho());
+        }
+        catch (Exception erro)
+        {}
+        
+        // Instanciamos um controlador de letras já digitadas
+        controladorDeLetrasJaDigitadas = new ControladorDeLetrasJaDigitadas ();
+        
+        // Instanciamos um controlador de erros
+		controladorDeErros = null;
+		try
+		{
+			controladorDeErros = new ControladorDeErros ((int)(palavra.getTamanho()*0.6));
+		}
+		catch (Exception erro)
+		{}
+				
         try
         {
-            synchronized (this.usuarios)
-            {
-                this.usuarios.add (this.usuario);
-            }
-
-
-            for(;;)
-            {
-                Comunicado comunicado = this.usuario.envie ();
+            while (tracinhos.isAindaComTracinhos() &&
+				  !controladorDeErros.isAtingidoMaximoDeErros())
+		    {
+				// COMUNICADOS DO CLIENTE
+				/* PEDIDO DE TRACINHOS
+				 * PEDIDO DE ERROS
+				 * PEDIDO DE LETRAS JÁ DIGITADAS
+				 * PEDIDO PARA SAIR
+				 * COMUNICADO CHUTE DE LETRA
+				 * COMUNICADO CHUTE DE PALAVRA
+				 * 
+				 * 
+				 */
+				// COMUNICADOS DO SERVIDOR
+				/*
+				 * COMUNICADO DE ERRO
+				 * COMUNICADO DE ACERTO
+				 * COMUNICADO DE VITÓRIA
+				 * COMUNICADO DE DERROTA
+				 */
+				 
+				 // como vamos pegar o parceiro certo?
+				 // -> o vetor grupo tem sockets (não parceiros)
+				 // -> o vetor usuarios tem parceiros, mas ele é geral (tem todos os usuários do jogo, de todos os grupos)
+				for (int i = 0; i < 3; i++)
+				{
+					Comunicado comunicado = this.grupo.get(i).envie ();
+				}
+                /*
 
                 if (comunicado==null)
                     return;
-                else if (comunicado instanceof PedidoDeOperacao)
+                else if (comunicado instanceof PedidoDeTracinhos)
                 {
 					PedidoDeOperacao pedidoDeOperacao = (PedidoDeOperacao)comunicado;
 					
@@ -151,7 +201,6 @@ public class SupervisoraDeConexao extends Thread
 
             return;
         }
-*/
     }
     
 }
