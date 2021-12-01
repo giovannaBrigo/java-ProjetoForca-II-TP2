@@ -29,14 +29,9 @@ public class SupervisoraDeConexao extends Thread
             throw new Exception ("Usuarios ausentes");
 
 		this.usuarios = usuarios;
-		// Não sei se posso fazer isso aqui!
+		
 		// Instanciamos this.grupo
-		this.grupo    = new ArrayList<Socket>;
-		// this.grupo recebe todos os elementos de grupo
-		for (int i = 0; i < grupo.size(); i++)
-		{
-			this.grupo = grupo.get(i);
-		}
+		this.grupo = grupo;
 		
 		this.parceiros = new ArrayList<Parceiro> ();
     }
@@ -150,7 +145,7 @@ public class SupervisoraDeConexao extends Thread
 			 * COMUNICADO DE VITÓRIA
 			 * COMUNICADO DE DERROTA
 			 * COMUNICADO TRACINHOS
-			 * COMUNICADO LETRAS JÁ DIGITADAS
+			 * COMUNICADO LETRAS JA DIGITADAS
 			 */
 				 
             for(;;)
@@ -158,11 +153,11 @@ public class SupervisoraDeConexao extends Thread
 				for (int i = 0; i < parceiros.size(); i++)
 				{
 					// o mesmo for????????? :( n sei AAAAAAAAA
-					for (int i = 0; i < parceiros.size(); i++)
+					for (int c = 0; c < parceiros.size(); c++)
 					{
 						// tem que fazer os dois comunicados
-						this.parceiros.get(i).receba (new ComunicadoTracinhos(this.tracinhos));
-						this.parceiros.get(i).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
+						this.parceiros.get(c).receba (new ComunicadoTracinhos(this.tracinhos));
+						this.parceiros.get(c).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
 					}
 					
 					// recebemos um comunicado do usuario, seguindo a ordem de entrada no grupo
@@ -172,38 +167,46 @@ public class SupervisoraDeConexao extends Thread
 						return;
 					else if (comunicado instanceof ChuteDeLetra)
 					{
-						PedidoDeOperacao pedidoDeOperacao = (PedidoDeOperacao)comunicado;
+						// acho que tem que melhorar o nome desse comunicado kkkkkkk
+						ChuteDeLetra chuteDeLetra = (ChuteDeLetra)comunicado;
 					
-						switch (pedidoDeOperacao.getOperacao())
-						{
-							case '+':
-								this.valor += pedidoDeOperacao.getValor();
-								break;
-						    
-							case '-':
-								this.valor -= pedidoDeOperacao.getValor();
-								break;
-						    
-							case '*':
-								this.valor *= pedidoDeOperacao.getValor();
-								break;
-						    
-							case '/':
-								this.valor /= pedidoDeOperacao.getValor();
-						}
+						// aqui tem que pegar a letra que o usuário chutou
+						// e ver se ela existe na palavra, se não existir
+						// passa a vez pro próximo usuário; se existir,
+						// atualiza tracinhos
+						
 					}
 					else if (comunicado instanceof ChuteDePalavra)
 					{
-						this.usuario.receba (new Resultado (this.valor));
+						// aqui tem que ver se a palvra é igual a palavra chutada
+						// pelo usuário, se for, ele ganha o jogo e os outros dois
+						// perdem (acabar a conexão com todos e enviar comunicados de
+						// vitória e derrotas). Se não for, ele perde o jogo e os 
+					    // outros dois continuam (acabar a conexão com o usuário que perdeu)
+						
 					}
 					else if (comunicado instanceof PedidoParaSair)
 					{
-						// conferir se tá certo depois
+						// aqui, se o usuário pedir para sair, vamos acabar 
+						// a conexão com ele.
+						// se ele estiver num grupo de 3, ele sai desse grupo
+						// e os outros dois continuam.
+						// se ele estiver num grupo de 2, ele sai do grupo
+						// e o jogador que restou ganha
+						
 						synchronized (this.usuarios)
 						{
 							this.usuarios.remove (this.parceiros.get(i));
 						}
 						this.parceiros.get(i).adeus();
+						
+						// n sei se preciso fazer isso
+						this.parceiros.remove (this.parceiros.get(i));
+						
+						if (parceiros.size() == 1)
+						{
+							parceiros.get(0).receba (new ComunicadoDeVitoria());
+						}
 					}
 				}
             }
@@ -212,8 +215,11 @@ public class SupervisoraDeConexao extends Thread
         {
             try
             {
-                transmissor.close ();
-                receptor   .close ();
+				for (int i = 0; i < parceiros.size(); i++)
+				{
+					transmissores.get(i).close ();
+					receptores.get(i)   .close ();
+				}
             }
             catch (Exception falha)
             {} // so tentando fechar antes de acabar a thread
@@ -221,5 +227,4 @@ public class SupervisoraDeConexao extends Thread
             return;
         }
     }
-    
 }
