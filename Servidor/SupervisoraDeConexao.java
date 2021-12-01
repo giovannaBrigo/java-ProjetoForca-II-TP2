@@ -152,22 +152,19 @@ public class SupervisoraDeConexao extends Thread
             {
 				for (int i = 0; i < parceiros.size(); i++)
 				{
-					// o mesmo for????????? :( n sei AAAAAAAAA
 					for (int c = 0; c < parceiros.size(); c++)
 					{
-						// tem que fazer os dois comunicados
-						this.parceiros.get(c).receba (new ComunicadoTracinhos(this.tracinhos));
+						// tem que fazer esses dois comunicados (tracinhos e letras já digitadas)
+						this.parceiros.get(c).receba (new ComunicadoTracinhos (this.tracinhos));
 						this.parceiros.get(c).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
 					}
 					
-					// recebemos um comunicado do usuario, seguindo a ordem de entrada no grupo
 					Comunicado comunicado = this.parceiros.get(i).envie ();
 
 					if (comunicado==null)
 						return;
 					else if (comunicado instanceof ChuteDeLetra)
 					{
-						// acho que tem que melhorar o nome desse comunicado kkkkkkk
 						ChuteDeLetra chuteDeLetra = (ChuteDeLetra)comunicado;
 					
 						// aqui tem que pegar a letra que o usuário chutou
@@ -175,19 +172,33 @@ public class SupervisoraDeConexao extends Thread
 						// passa a vez pro próximo usuário; se existir,
 						// atualiza tracinhos
 						
+						// (da pra ver como fazer isso +/- nas classes do jogo da forca msm)
+						
 					}
 					else if (comunicado instanceof ChuteDePalavra)
 					{
-						// aqui tem que ver se a palvra é igual a palavra chutada
+						ChuteDePalavra chuteDePalavra = (ChuteDePalavra)comunicado;
+						
+						// aqui tem que ver se a palavra é igual a palavra chutada
 						// pelo usuário, se for, ele ganha o jogo e os outros dois
 						// perdem (acabar a conexão com todos e enviar comunicados de
 						// vitória e derrotas). Se não for, ele perde o jogo e os 
 					    // outros dois continuam (acabar a conexão com o usuário que perdeu)
+					    
+					    // se for fazer assim, o comunicado de chuteDePalavra tem que conter
+					    // a palavra que o usuário chutou
+					    if (ChuteDePalavra.getPalavra().equals(palavra)) // verifica se a palavra q o usuário chutou é equals da palavra sorteada
+					    {
+							
+						}
+						else
+						{
+						}
 						
 					}
 					else if (comunicado instanceof PedidoParaSair)
 					{
-						// aqui, se o usuário pedir para sair, vamos acabar 
+						// se o usuário pedir para sair, vamos acabar 
 						// a conexão com ele.
 						// se ele estiver num grupo de 3, ele sai desse grupo
 						// e os outros dois continuam.
@@ -198,13 +209,17 @@ public class SupervisoraDeConexao extends Thread
 						{
 							this.usuarios.remove (this.parceiros.get(i));
 						}
+						this.transmissores.remove (this.transmissores.get(i));
+						this.receptores   .remove (this.receptores.get(i));
 						this.parceiros.get(i).adeus();
 						
-						// n sei se preciso fazer isso
 						this.parceiros.remove (this.parceiros.get(i));
 						
 						if (parceiros.size() == 1)
 						{
+							// o comunicado de vitória tem que encerrar a
+							// conexão com o usuário e fazer o cliente avisar
+							// a ele que ele ganhou
 							parceiros.get(0).receba (new ComunicadoDeVitoria());
 						}
 					}
