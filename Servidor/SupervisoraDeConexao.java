@@ -1,31 +1,44 @@
+///////////////////////
+// CLASSE MODIFICADA //
+///////////////////////
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class SupervisoraDeConexao extends Thread
 {
-	//valor=0; // aqui tem que ver oq vai usar da forca
-	private ControladorDeLetrasJaDigitadas controladorDeLetrasJaDigitadas;
-    private ControladorDeErros             controladorDeErros;
+    // private double              valor=0; // aqui tem que ver oq vai usar da forca
+    // PARA O JOGO DA FORCA:
+    private ControladorDeLetrasJaDigitadas controladorDeLetrasJaDigitadas;
     private Tracinhos                      tracinhos;
     private Palavra                        palavra;
-    private ArrayList<Parceiro>            usuarios;
-    private ArrayList<ArrayList<Socket>>   grupos;
+    /////////////////////////////////////////////////////////////////////////////
     private ArrayList<Socket>              grupo;
+    private ArrayList<Parceiro>            usuarios;
+    private ArrayList<Parceiro>            parceiros;
 
     public SupervisoraDeConexao
-    (ArrayList<ArrayList<Socket>> grupos, 
-    ArrayList<Socket> grupo)
+    (ArrayList<Socket> grupo, ArrayList<Parceiro> usuarios)
     throws Exception
     {
         if (grupo==null)
             throw new Exception ("Grupo ausente");
 
-        if (grupos==null)
-            throw new Exception ("Grupos ausentes");
+        if (usuarios==null)
+            throw new Exception ("Usuarios ausentes");
 
-        this.grupos = grupos;
-        this.grupo  = grupo;
+		this.usuarios = usuarios;
+		// Não sei se posso fazer isso aqui!
+		// Instanciamos this.grupo
+		this.grupo    = new ArrayList<Socket>;
+		// this.grupo recebe todos os elementos de grupo
+		for (int i = 0; i < grupo.size(); i++)
+		{
+			this.grupo = grupo.get(i);
+		}
+		
+		this.parceiros = new ArrayList<Parceiro> ();
     }
 
     public void run ()
@@ -64,7 +77,7 @@ public class SupervisoraDeConexao extends Thread
 				try
 				{
 					// será que ter um for aqui é bom? já que o prof falou que esses
-					// comandos as vezes nem tem tempode de serem executados direito
+					// comandos as vezes nem tem tempo de de serem executados direito
 					// e o for demora mais ainda...
 					for (int c = 0; c < 3; c++)
 					{
@@ -72,24 +85,21 @@ public class SupervisoraDeConexao extends Thread
 					}
 				}
 				catch (Exception falha)
-				{} // so tentando fechar antes de acabar a thread
+				{} // so tentando fechar antes de acabar a thread -> coment do prof
             
 				return;
 			}
 			
 			receptores.add(receptor);
 		}
-
+		
 		for (int i = 0; i < grupo.size(); i++)
 		{
 			try
 			{
-				synchronized (this.usuarios)
-				{
-					this.usuarios.add(new Parceiro (this.grupo.get(i),
-													receptores.get(i),
-													transmissores.get(i)));
-				}
+				this.parceiros.add(new Parceiro (this.grupo.get(i),
+												 receptores.get(i),
+												 transmissores.get(i)));
 			}
 			catch (Exception erro)
 			{} // sei que passei os parametros corretos
@@ -109,87 +119,96 @@ public class SupervisoraDeConexao extends Thread
         
         // Instanciamos um controlador de letras já digitadas
         controladorDeLetrasJaDigitadas = new ControladorDeLetrasJaDigitadas ();
+
+		// será que a gente faz um controlador de erros? mesmo que n influencie muito no jogo
         
-        // Instanciamos um controlador de erros
-		controladorDeErros = null;
-		try
-		{
-			controladorDeErros = new ControladorDeErros ((int)(palavra.getTamanho()*0.6));
-		}
-		catch (Exception erro)
-		{}
-				
         try
         {
-            while (tracinhos.isAindaComTracinhos() &&
-				  !controladorDeErros.isAtingidoMaximoDeErros())
-		    {
-				// COMUNICADOS DO CLIENTE
-				/* PEDIDO DE TRACINHOS
-				 * PEDIDO DE ERROS
-				 * PEDIDO DE LETRAS JÁ DIGITADAS
-				 * PEDIDO PARA SAIR
-				 * COMUNICADO CHUTE DE LETRA
-				 * COMUNICADO CHUTE DE PALAVRA
-				 * 
-				 * 
-				 */
-				// COMUNICADOS DO SERVIDOR
-				/*
-				 * COMUNICADO DE ERRO
-				 * COMUNICADO DE ACERTO
-				 * COMUNICADO DE VITÓRIA
-				 * COMUNICADO DE DERROTA
-				 */
-				 
-				 // como vamos pegar o parceiro certo?
-				 // -> o vetor grupo tem sockets (não parceiros)
-				 // -> o vetor usuarios tem parceiros, mas ele é geral (tem todos os usuários do jogo, de todos os grupos)
-				for (int i = 0; i < 3; i++)
+            synchronized (this.usuarios)
+            {
+                for (int i = 0; i < grupo.size(); i++)
 				{
-					Comunicado comunicado = this.grupo.get(i).envie ();
-				}
-                /*
-
-                if (comunicado==null)
-                    return;
-                else if (comunicado instanceof PedidoDeTracinhos)
-                {
-					PedidoDeOperacao pedidoDeOperacao = (PedidoDeOperacao)comunicado;
-					
-					switch (pedidoDeOperacao.getOperacao())
+					try
 					{
-						case '+':
-						    this.valor += pedidoDeOperacao.getValor();
-						    break;
+						this.usuarios.add(parceiros.get(i));
+					}
+					catch (Exception erro)
+					{} // sei que passei os parametros corretos
+				}
+            }
+
+
+			// COMUNICADOS DO CLIENTE
+			/* PEDIDO PARA SAIR
+			 * COMUNICADO CHUTE DE LETRA
+			 * COMUNICADO CHUTE DE PALAVRA
+			 */
+			// COMUNICADOS DO SERVIDOR (NESSA TAREFA SUPERVISORA)
+			/*
+			 * COMUNICADO DE ERRO
+			 * COMUNICADO DE ACERTO
+			 * COMUNICADO DE VITÓRIA
+			 * COMUNICADO DE DERROTA
+			 * COMUNICADO TRACINHOS
+			 * COMUNICADO LETRAS JÁ DIGITADAS
+			 */
+				 
+            for(;;)
+            {
+				for (int i = 0; i < parceiros.size(); i++)
+				{
+					// o mesmo for????????? :( n sei AAAAAAAAA
+					for (int i = 0; i < parceiros.size(); i++)
+					{
+						// tem que fazer os dois comunicados
+						this.parceiros.get(i).receba (new ComunicadoTracinhos(this.tracinhos));
+						this.parceiros.get(i).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
+					}
+					
+					// recebemos um comunicado do usuario, seguindo a ordem de entrada no grupo
+					Comunicado comunicado = this.parceiros.get(i).envie ();
+
+					if (comunicado==null)
+						return;
+					else if (comunicado instanceof ChuteDeLetra)
+					{
+						PedidoDeOperacao pedidoDeOperacao = (PedidoDeOperacao)comunicado;
+					
+						switch (pedidoDeOperacao.getOperacao())
+						{
+							case '+':
+								this.valor += pedidoDeOperacao.getValor();
+								break;
 						    
-						case '-':
-						    this.valor -= pedidoDeOperacao.getValor();
-						    break;
+							case '-':
+								this.valor -= pedidoDeOperacao.getValor();
+								break;
 						    
-						case '*':
-						    this.valor *= pedidoDeOperacao.getValor();
-						    break;
+							case '*':
+								this.valor *= pedidoDeOperacao.getValor();
+								break;
 						    
-						case '/':
-						    this.valor /= pedidoDeOperacao.getValor();
-                    }
-                }
-                else if (comunicado instanceof PedidoDeResultado)
-                {
-                    this.usuario.receba (new Resultado (this.valor));
-                }
-                else if (comunicado instanceof PedidoParaSair)
-                {
-                    synchronized (this.usuarios)
-                    {
-                        this.usuarios.remove (this.usuario);
-                    }
-                    this.usuario.adeus();
-                }
+							case '/':
+								this.valor /= pedidoDeOperacao.getValor();
+						}
+					}
+					else if (comunicado instanceof ChuteDePalavra)
+					{
+						this.usuario.receba (new Resultado (this.valor));
+					}
+					else if (comunicado instanceof PedidoParaSair)
+					{
+						// conferir se tá certo depois
+						synchronized (this.usuarios)
+						{
+							this.usuarios.remove (this.parceiros.get(i));
+						}
+						this.parceiros.get(i).adeus();
+					}
+				}
             }
         }
-        catch (Exception erro)
+        catch (Exception erro) // depois tenho que verificar esse catch
         {
             try
             {
@@ -201,6 +220,7 @@ public class SupervisoraDeConexao extends Thread
 
             return;
         }
+*/
     }
     
 }

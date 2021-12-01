@@ -1,24 +1,18 @@
+///////////////////////
+// CLASSE MODIFICADA //
+///////////////////////
+
 import java.net.*;
 import java.util.*;
 
 public class AceitadoraDeConexao extends Thread
 {
     private ServerSocket pedido;
-    // será que pra instanciar eu tenho que tirar o Grupo<Parceiro>? pq isso parece
-    // classe genérica
-    // assim:
-    private ArrayList<ArrayList<Socket>> grupos;  // arraylist que vai guardar os grupos
-    // ou assim:
-    // private ArrayList<<Grupo<Parceiro>> grupos; // arraylist que vai guardar os grupos
-    // ou assim:
-    // private ArrayList grupos;
+    ArrayList<Parceiro> usuarios;
+    ArrayList<Socket>   grupo;
     
-    // será que posso instanciar aqui?
- // private ArrayList<Socket> grupo = new ArrayList(); // arraylist que guarda sockets 
-	private ArrayList<Socket> grupo;
-
     public AceitadoraDeConexao
-    (String porta, ArrayList grupos)
+    (String porta, ArrayList usuarios)
     throws Exception
     {
         if (porta==null)
@@ -34,15 +28,11 @@ public class AceitadoraDeConexao extends Thread
             throw new Exception ("Porta invalida");
         }
 
-        if (grupos==null)
-            throw new Exception ("Grupos ausentes");
-
-        this.grupos = grupos;
-        this.grupo  = new ArrayList<Socket> ();
-        
-        // no fim desse método teremos um arraylist usuários
-        // e um server socket (servidor?) -> aceita conexões
-        // e retorna um socket
+        if (usuarios==null)
+            throw new Exception ("Usuarios ausentes");
+            
+        this.usuarios = usuarios;
+        this.grupo    = new ArrayList<Socket>;
     }
 
     public void run ()
@@ -52,31 +42,32 @@ public class AceitadoraDeConexao extends Thread
 			Socket conexao=null;
 			try
 			{
-				conexao = this.pedido.accept(); // espera UMA conexão ser aceita,
-												// quando é, cria o socket conexao.
-				grupo.add(conexao);             // quando uma conexão é aceita, 
-												// adicionamos ela no grupo.
+				conexao = this.pedido.accept(); 
+				grupo.add(conexao);
 			}
 			catch (Exception erro)
 			{
 				continue;
 			}
 			
-			// depois de criar um grupo de 3
+			// Depois de criar um grupo de 3
             if (grupo.size() == 3)
-            {
-				grupos.add(grupo); // adicionamos um grupo ao ArrayList grupo
-				
+            {		
+				// Instanciamos um objeto da SupervisoraDeConexao		
 				SupervisoraDeConexao supervisoraDeConexao=null;
 				try
 				{
 					supervisoraDeConexao = 
-					new SupervisoraDeConexao (grupo, grupos);
+					new SupervisoraDeConexao (grupo, usuarios);
 				}
 				catch (Exception erro)
-				{} // sei que passei parametros corretos para o construtor
+				{} // Sei que passei parametros corretos para o construtor
 				
+				// Startamos a SupervisoraDeConexao
 				supervisoraDeConexao.start();
+				// Limpamos todas as conexões do grupo 
+				// (não sei se isso vai mexer com o grupo da supervisora)
+				grupo.clear();
 			}
         }
     }

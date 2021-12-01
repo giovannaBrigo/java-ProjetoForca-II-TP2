@@ -17,27 +17,16 @@ public class Servidor
         if (args.length==1)
             porta = args[0];
 
-
-		// talvez o vetor grupos precisa ser feito aqui, já que ele precisa
-		// desativar o servidor e mandar comunicado de desligamento!
-		//
-		// array list? (qual seria bom pra formar grupos de 3?) -> acho que por enquanto
-		// vou continuar com array list
-		// vai ser array list do que? -> array list de grupo?
-		
-		// assim:
-		ArrayList grupos = new ArrayList ();
-        // ou assim:
-     // ArrayList<Grupo<Parceiro>> grupos =
-     // new ArrayList<Grupo<Parceiro>> ();
+        /////////////////////////////// ?????
+		ArrayList<Parceiro> usuarios =
+		new ArrayList<Parceiro> ();
+		//////////////////////////////////////
 
         AceitadoraDeConexao aceitadoraDeConexao=null;
         try
         {
-			// a aceitadora de conexão será a responsável por formar
-			// grupos de 3!
             aceitadoraDeConexao =
-            new AceitadoraDeConexao (porta, grupos);
+            new AceitadoraDeConexao (porta, usuarios);
             aceitadoraDeConexao.start();
         }
         catch (Exception erro)
