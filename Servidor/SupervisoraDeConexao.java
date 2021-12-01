@@ -220,7 +220,6 @@ public class SupervisoraDeConexao extends Thread
 
             return;
         }
-*/
     }
     
 }
