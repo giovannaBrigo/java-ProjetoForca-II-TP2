@@ -8,12 +8,9 @@ import java.util.*;
 
 public class SupervisoraDeConexao extends Thread
 {
-    // private double              valor=0; // aqui tem que ver oq vai usar da forca
-    // PARA O JOGO DA FORCA:
     private ControladorDeLetrasJaDigitadas controladorDeLetrasJaDigitadas;
     private Tracinhos                      tracinhos;
     private Palavra                        palavra;
-    /////////////////////////////////////////////////////////////////////////////
     private ArrayList<Socket>              grupo;
     private ArrayList<Parceiro>            usuarios;
     private ArrayList<Parceiro>            parceiros;
@@ -39,14 +36,14 @@ public class SupervisoraDeConexao extends Thread
     public void run ()
     {
 		ArrayList<ObjectOutputStream> transmissores;
-		for (int i = 0; i < 3; i++)
+		for (int c = 0; c < 3; c++)
 		{
 			ObjectOutputStream transmissor;
 			try
 			{
 				transmissor =
 				new ObjectOutputStream(
-				this.grupo.get(i).getOutputStream());
+				this.grupo.get(c).getOutputStream());
 			
 			}
 			catch (Exception erro)
@@ -58,25 +55,23 @@ public class SupervisoraDeConexao extends Thread
         }
         
         ArrayList<ObjectInputStream> receptores;
-        for (int i = 0; i < 3; i++)
+        for (int c = 0; c < 3; c++)
 		{
 			ObjectInputStream receptor=null;
 			try
 			{
-				receptor=
+				receptor =
 				new ObjectInputStream(
-				this.grupo.get(i).getInputStream());
+				this.grupo.get(c).getInputStream());
 			}
 			catch (Exception err0)
 			{
 				try
 				{
-					// será que ter um for aqui é bom? já que o prof falou que esses
-					// comandos as vezes nem tem tempo de de serem executados direito
-					// e o for demora mais ainda...
-					for (int c = 0; c < 3; c++)
+					// será que ter um for aqui é bom?
+					for (int c2 = 0; c2 < 3; c2++)
 					{
-						transmissores.get(c).close();
+						transmissores.get(c2).close();
 					}
 				}
 				catch (Exception falha)
@@ -88,13 +83,13 @@ public class SupervisoraDeConexao extends Thread
 			receptores.add(receptor);
 		}
 		
-		for (int i = 0; i < grupo.size(); i++)
+		for (int c = 0; c < grupo.size(); c++)
 		{
 			try
 			{
-				this.parceiros.add(new Parceiro (this.grupo.get(i),
-												 receptores.get(i),
-												 transmissores.get(i)));
+				this.parceiros.add(new Parceiro (this.grupo.get(c),
+												 receptores.get(c),
+												 transmissores.get(c)));
 			}
 			catch (Exception erro)
 			{} // sei que passei os parametros corretos
@@ -121,11 +116,11 @@ public class SupervisoraDeConexao extends Thread
         {
             synchronized (this.usuarios)
             {
-                for (int i = 0; i < grupo.size(); i++)
+                for (int c = 0; c < grupo.size(); c++)
 				{
 					try
 					{
-						this.usuarios.add(parceiros.get(i));
+						this.usuarios.add(parceiros.get(c));
 					}
 					catch (Exception erro)
 					{} // sei que passei os parametros corretos
@@ -134,37 +129,37 @@ public class SupervisoraDeConexao extends Thread
 
 
 			// COMUNICADOS DO CLIENTE
-			/* PEDIDO PARA SAIR
-			 * COMUNICADO CHUTE DE LETRA
-			 * COMUNICADO CHUTE DE PALAVRA
+			/* PEDIDO PARA SAIR               -> FEITO (?) - FALTA TESTAR
+			 * COMUNICADO CHUTE DE LETRA      
+			 * COMUNICADO CHUTE DE PALAVRA    -> FEITO (?) - FALTA TESTAR
 			 */
 			// COMUNICADOS DO SERVIDOR (NESSA TAREFA SUPERVISORA)
 			/*
-			 * COMUNICADO DE ERRO
-			 * COMUNICADO DE ACERTO
-			 * COMUNICADO DE VITÓRIA
-			 * COMUNICADO DE DERROTA
-			 * COMUNICADO TRACINHOS
-			 * COMUNICADO LETRAS JA DIGITADAS
+			 * COMUNICADO DE ERRO                       
+			 * COMUNICADO DE ACERTO            
+			 * COMUNICADO DE VITÓRIA          -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
+			 * COMUNICADO DE DERROTA          -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
+			 * COMUNICADO TRACINHOS           -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
+			 * COMUNICADO LETRAS JA DIGITADAS -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
 			 */
 				 
             for(;;)
             {
-				for (int i = 0; i < parceiros.size(); i++)
+				for (int c = 0; c < parceiros.size(); c++)
 				{
-					for (int c = 0; c < parceiros.size(); c++)
+					for (int c2 = 0; c2 < parceiros.size(); c2++)
 					{
-						// tem que fazer esses dois comunicados (tracinhos e letras já digitadas)
-						this.parceiros.get(c).receba (new ComunicadoTracinhos (this.tracinhos));
-						this.parceiros.get(c).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
+						this.parceiros.get(c2).receba (new ComunicadoTracinhos (this.tracinhos));
+						this.parceiros.get(c2).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
 					}
 					
-					Comunicado comunicado = this.parceiros.get(i).envie ();
+					Comunicado comunicado = this.parceiros.get(c).envie ();
 
 					if (comunicado==null)
 						return;
 					else if (comunicado instanceof ChuteDeLetra)
 					{
+						// acho que tem que melhorar o nome desse comunicado kkkkkkk
 						ChuteDeLetra chuteDeLetra = (ChuteDeLetra)comunicado;
 					
 						// aqui tem que pegar a letra que o usuário chutou
@@ -172,7 +167,7 @@ public class SupervisoraDeConexao extends Thread
 						// passa a vez pro próximo usuário; se existir,
 						// atualiza tracinhos
 						
-						// (da pra ver como fazer isso +/- nas classes do jogo da forca msm)
+						
 						
 					}
 					else if (comunicado instanceof ChuteDePalavra)
@@ -187,18 +182,49 @@ public class SupervisoraDeConexao extends Thread
 					    
 					    // se for fazer assim, o comunicado de chuteDePalavra tem que conter
 					    // a palavra que o usuário chutou
-					    if (ChuteDePalavra.getPalavra().equals(palavra)) // verifica se a palavra q o usuário chutou é equals da palavra sorteada
+					    if (chuteDePalavra.getPalavra().equals(palavra))
 					    {
+							parceiros.get(c).receba(new ComunicadoDeVitoria());
 							
+							for (int c3 = parceiros.size()-1; c3 >= 0 ; c3--)
+							{
+								if (parceiros.get(c3) != parceiros.get(c))
+								{
+									parceiros.get(c3).receba(new ComunicadoDeDerrota());
+								}
+								
+								synchronized (this.usuarios)
+								{								
+									this.usuarios.remove (this.parceiros.get(c3));
+								}
+								
+								this.transmissores.remove (this.transmissores.get(c3));
+								this.receptores   .remove (this.receptores.get(c3));
+								this.parceiros.get(c3).adeus();
+								
+								this.parceiros.remove (this.parceiros.get(c3));
+							}							
 						}
 						else
 						{
+							parceiros.get(c).receba(new ComunicadoDeDerrota());
+							
+							synchronized (this.usuarios)
+							{								
+								this.usuarios.remove (this.parceiros.get(c));
+							}
+							
+							this.transmissores.remove (this.transmissores.get(c));
+							this.receptores   .remove (this.receptores.get(c));
+							
+							this.parceiros.get(c).adeus();
+							this.parceiros.remove (this.parceiros.get(c));
 						}
 						
 					}
 					else if (comunicado instanceof PedidoParaSair)
 					{
-						// se o usuário pedir para sair, vamos acabar 
+						// aqui, se o usuário pedir para sair, vamos acabar 
 						// a conexão com ele.
 						// se ele estiver num grupo de 3, ele sai desse grupo
 						// e os outros dois continuam.
@@ -207,33 +233,30 @@ public class SupervisoraDeConexao extends Thread
 						
 						synchronized (this.usuarios)
 						{
-							this.usuarios.remove (this.parceiros.get(i));
+							this.usuarios.remove (this.parceiros.get(c));
 						}
-						this.transmissores.remove (this.transmissores.get(i));
-						this.receptores   .remove (this.receptores.get(i));
-						this.parceiros.get(i).adeus();
+						this.transmissores.remove (this.transmissores.get(c)); 
+						this.receptores   .remove (this.receptores.get(c));
+						this.parceiros.get(c).adeus();
 						
-						this.parceiros.remove (this.parceiros.get(i));
+						this.parceiros.remove (this.parceiros.get(c));
 						
 						if (parceiros.size() == 1)
 						{
-							// o comunicado de vitória tem que encerrar a
-							// conexão com o usuário e fazer o cliente avisar
-							// a ele que ele ganhou
 							parceiros.get(0).receba (new ComunicadoDeVitoria());
 						}
 					}
 				}
             }
         }
-        catch (Exception erro) // depois tenho que verificar esse catch
+        catch (Exception erro)
         {
             try
             {
-				for (int i = 0; i < parceiros.size(); i++)
+				for (int c = parceiros.size()-1; c >= 0; c--)
 				{
-					transmissores.get(i).close ();
-					receptores.get(i)   .close ();
+					transmissores.get(c).close ();
+					receptores   .get(c).close ();
 				}
             }
             catch (Exception falha)
