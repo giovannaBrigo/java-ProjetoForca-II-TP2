@@ -1,9 +1,20 @@
+// Danyelle Nogueira França 21232
+// Julia Flausino da Silva 21241
+// Giovanna do Amaral Brigo 21685
+// Maria Julia Hofstetter Trevisan Pereira 21250
+
+package br.unicamp.cotuca.tp2mat2021.projetofinal.servidor;
+
+import br.unicamp.cotuca.tp2mat2021.projetofinal.Parceiro;
+import br.unicamp.cotuca.tp2mat2021.projetofinal.Teclado;
+import br.unicamp.cotuca.tp2mat2021.projetofinal.comunicados.ComunicadoDeDesligamento;
+
 import java.util.*;
 
 public class Servidor
 {
-	public static String PORTA_PADRAO = "3000";
-	
+    public static String PORTA_PADRAO = "3000";
+
     public static void main (String[] args)
     {
         if (args.length>1)
@@ -13,20 +24,16 @@ public class Servidor
         }
 
         String porta=Servidor.PORTA_PADRAO;
-        
-        if (args.length==1)
-            porta = args[0];
 
-        /////////////////////////////// ?????
-		ArrayList<Parceiro> usuarios =
-		new ArrayList<Parceiro> ();
-		//////////////////////////////////////
+        if (args.length==1) porta = args[0];
+
+        ArrayList<Parceiro> usuarios = new ArrayList<Parceiro> ();
 
         AceitadoraDeConexao aceitadoraDeConexao=null;
         try
         {
-            aceitadoraDeConexao =
-            new AceitadoraDeConexao (porta, usuarios);
+            aceitadoraDeConexao = new AceitadoraDeConexao (porta, usuarios);
+
             aceitadoraDeConexao.start();
         }
         catch (Exception erro)
@@ -53,9 +60,9 @@ public class Servidor
             {
                 synchronized (usuarios)
                 {
-					ComunicadoDeDesligamento comunicadoDeDesligamento =
-                    new ComunicadoDeDesligamento ();
-                    
+                    ComunicadoDeDesligamento comunicadoDeDesligamento =
+                            new ComunicadoDeDesligamento ();
+
                     for (Parceiro usuario:usuarios)
                     {
                         try
@@ -76,3 +83,4 @@ public class Servidor
         }
     }
 }
+

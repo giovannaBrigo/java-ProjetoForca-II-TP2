@@ -1,6 +1,13 @@
+// Danyelle Nogueira França 21232
+// Julia Flausino da Silva 21241
+// Giovanna do Amaral Brigo 21685
+// Maria Julia Hofstetter Trevisan Pereira 21250
+
+package br.unicamp.cotuca.tp2mat2021.projetofinal;
+import br.unicamp.cotuca.tp2mat2021.projetofinal.comunicados.Comunicado;
+
 import java.io.*;
 import java.net.*;
-import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class Parceiro
@@ -8,7 +15,7 @@ public class Parceiro
     private Socket             conexao;
     private ObjectInputStream  receptor;
     private ObjectOutputStream transmissor;
-    
+
     private Comunicado proximoComunicado=null;
 
     private Semaphore mutEx = new Semaphore (1,true);
@@ -16,7 +23,7 @@ public class Parceiro
     public Parceiro (Socket             conexao,
                      ObjectInputStream  receptor,
                      ObjectOutputStream transmissor)
-                     throws Exception // se parametro nulos
+            throws Exception // se parametro nulos
     {
         if (conexao==null)
             throw new Exception ("Conexao ausente");

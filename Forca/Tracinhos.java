@@ -1,37 +1,41 @@
 // Danyelle Nogueira França 21232
 // Julia Flausino da Silva  21241
 // Giovanna do Amaral Brigo 21685
+// Maria Julia Hofstetter Trevisan Pereira 21250
 
-public class Tracinhos implements Cloneable
+package br.unicamp.cotuca.tp2mat2021.projetofinal.forca;
+import java.io.Serializable;
+
+public class Tracinhos implements Cloneable, Serializable
 {
     private char texto [];
 
     public Tracinhos (int qtd) throws Exception
     {
-		// verifica se qtd não é positiva, lançando uma exceção.
-		// instancia this.texto com um vetor com tamanho igual qtd.
-		// preenche this.texto com underlines (_).
-		
-		if(qtd <= 0)
-		    throw new Exception ("Quantidade de tracinhos inválida!");
-		    
-		this.texto = new char[qtd];
-		
-		for (int i = 0; i < qtd; i++)
-			this.texto[i] = '_';
+        // verifica se qtd não é positiva, lançando uma exceção.
+        // instancia this.texto com um vetor com tamanho igual qtd.
+        // preenche this.texto com underlines (_).
+
+        if(qtd <= 0)
+            throw new Exception ("Quantidade de tracinhos inválida!");
+
+        this.texto = new char[qtd];
+
+        for (int i = 0; i < qtd; i++)
+            this.texto[i] = '_';
     }
 
     public void revele (int posicao, char letra) throws Exception
     {
-		// verifica se posicao é negativa ou então igual ou maior
-		// do que this.texto.length, lançando uma exceção.
-		// armazena a letra fornecida na posicao tambem fornecida
-		// do vetor this.texto
-		
-		if ((posicao < 0) || (posicao >= this.texto.length))
-		    throw new Exception ("Posição inválida!");
-		    
-	    this.texto[posicao] = Character.toUpperCase(letra);
+        // verifica se posicao é negativa ou então igual ou maior
+        // do que this.texto.length, lançando uma exceção.
+        // armazena a letra fornecida na posicao tambem fornecida
+        // do vetor this.texto
+
+        if ((posicao < 0) || (posicao >= this.texto.length))
+            throw new Exception ("Posição inválida!");
+
+        this.texto[posicao] = Character.toUpperCase(letra);
     }
 
     public boolean isAindaComTracinhos ()
@@ -41,14 +45,14 @@ public class Tracinhos implements Cloneable
         // foram todos substituidos por letras; retornar true
         // caso ainda reste algum underline, ou false caso
         // contrario
-        
+
         for (int i = 2; i < this.texto.length - 1; i++)
         {
-			if (this.texto[i] == '_')
-				return true;
-		}      
-		
-		return false;  
+            if (this.texto[i] == '_')
+                return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -57,12 +61,12 @@ public class Tracinhos implements Cloneable
         // retorna um String com TODOS os caracteres que há
         // no vetor this.texto, intercalados com espaços em
         // branco
-        
+
         String strTodos = "";
-        
+
         for(int i = 0; i < this.texto.length; i++)
-			strTodos += this.texto[i] + " ";
-        
+            strTodos += this.texto[i] + " ";
+
         return strTodos;
     }
 
@@ -71,36 +75,34 @@ public class Tracinhos implements Cloneable
     {
         // verificar se this e obj possuem o mesmo conteúdo, retornando
         // true no caso afirmativo ou false no caso negativo
-        
-		if (this==obj) return true;
-   
+
+        if (this==obj) return true;
+
         if (obj==null) return false;
 
         if (obj.getClass() != Tracinhos.class) return false;
 
         Tracinhos tracinhos = (Tracinhos)obj;
 
-		for(int i = 0; i < this.texto.length; i++)
-		{
-			if (tracinhos.texto[i] != this.texto[i])
-			return false;
-		}
+        for(int i = 0; i < this.texto.length; i++)
+        {
+            if (tracinhos.texto[i] != this.texto[i])
+                return false;
+        }
         return true;
     }
-    
+
     @Override
     public int hashCode ()
     {
         // calcular e retornar o hashcode de this
-        
-        int ret = super.hashCode(); 
-		
-		for(int i = 0; i<this.texto.length; i++)
-			ret=ret*7+(int)texto[i];
-			//ret = 7*ret + this.texto[i].hashCode();
-        
+        int ret = 5;
+
+        for(int i = 0; i<this.texto.length; i++)
+            ret=ret*7+(int)texto[i];
+
         if(ret < 0) ret = - ret;
-        
+
         return ret;
     }
 
@@ -108,31 +110,32 @@ public class Tracinhos implements Cloneable
     {
         // intanciar this.texto um vetor com o mesmo tamanho de t.texto
         // e copiar o conteúdo de t.texto para this.texto
-        
+
         if (t == null)
-			throw new Exception ("O objeto passado como parâmetro não foi instanciado.");
-        
+            throw new Exception ("O objeto passado como parâmetro não foi instanciado.");
+
         this.texto = new char[t.texto.length];
-        
+
         for (int i = 0; i < t.texto.length; i++)
         {
-			this.texto[i] = t.texto[i];
-		}
+            this.texto[i] = t.texto[i];
+        }
     }
 
     public Object clone ()
     {
         // retornar uma copia de this
-        
+
         Object copia=null;
-        
+
         try
         {
-			copia = new Tracinhos(this);
-		}
-		catch (Exception erro)
-		{}
-        
+            copia = new Tracinhos(this);
+        }
+        catch (Exception erro)
+        {}
+
         return copia;
     }
 }
+

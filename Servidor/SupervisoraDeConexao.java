@@ -1,266 +1,473 @@
-///////////////////////
-// CLASSE MODIFICADA //
-///////////////////////
+// Danyelle Nogueira França 21232
+// Julia Flausino da Silva 21241
+// Giovanna do Amaral Brigo 21685
+// Maria Julia Hofstetter Trevisan Pereira 21250
 
-import java.io.*;
-import java.net.*;
+package br.unicamp.cotuca.tp2mat2021.projetofinal.servidor;
+
+import br.unicamp.cotuca.tp2mat2021.projetofinal.Parceiro;
+import br.unicamp.cotuca.tp2mat2021.projetofinal.comunicados.*;
+import br.unicamp.cotuca.tp2mat2021.projetofinal.forca.*;
+
 import java.util.*;
 
 public class SupervisoraDeConexao extends Thread
 {
+    private ArrayList<Parceiro>            usuarios;
+    private ArrayList<Parceiro>            grupo;
     private ControladorDeLetrasJaDigitadas controladorDeLetrasJaDigitadas;
     private Tracinhos                      tracinhos;
     private Palavra                        palavra;
-    private ArrayList<Socket>              grupo;
-    private ArrayList<Parceiro>            usuarios;
-    private ArrayList<Parceiro>            parceiros;
 
-    public SupervisoraDeConexao
-    (ArrayList<Socket> grupo, ArrayList<Parceiro> usuarios)
-    throws Exception
+    public SupervisoraDeConexao (ArrayList<Parceiro> usuarios, ArrayList<Parceiro> grupo) throws Exception
     {
-        if (grupo==null)
-            throw new Exception ("Grupo ausente");
+        // verificamos se os parâmetros passados são nulos
+        if (usuarios == null)
+            throw new Exception("Usuarios ausente");
 
-        if (usuarios==null)
-            throw new Exception ("Usuarios ausentes");
+        if (grupo == null)
+            throw new Exception("Grupo ausente");
 
-		this.usuarios = usuarios;
-		
-		// Instanciamos this.grupo
-		this.grupo = grupo;
-		
-		this.parceiros = new ArrayList<Parceiro> ();
+        // this.usuarios recebe usuarios passado como parâmetro
+        synchronized (usuarios)
+        {
+            this.usuarios = usuarios;
+        }
+
+        // instanciamos this.grupo com new
+        this.grupo = new ArrayList<Parceiro>();
+        // passamos todos os elementos do grupo passado como parâmetro para this.grupo
+        this.grupo.addAll(grupo);
     }
 
     public void run ()
     {
-		ArrayList<ObjectOutputStream> transmissores;
-		for (int c = 0; c < 3; c++)
-		{
-			ObjectOutputStream transmissor;
-			try
-			{
-				transmissor =
-				new ObjectOutputStream(
-				this.grupo.get(c).getOutputStream());
-			
-			}
-			catch (Exception erro)
-			{
-				return;
-			}
-			
-			transmissores.add(transmissor);
-        }
-        
-        ArrayList<ObjectInputStream> receptores;
-        for (int c = 0; c < 3; c++)
-		{
-			ObjectInputStream receptor=null;
-			try
-			{
-				receptor =
-				new ObjectInputStream(
-				this.grupo.get(c).getInputStream());
-			}
-			catch (Exception err0)
-			{
-				try
-				{
-					// será que ter um for aqui é bom?
-					for (int c2 = 0; c2 < 3; c2++)
-					{
-						transmissores.get(c2).close();
-					}
-				}
-				catch (Exception falha)
-				{} // so tentando fechar antes de acabar a thread -> coment do prof
-            
-				return;
-			}
-			
-			receptores.add(receptor);
-		}
-		
-		for (int c = 0; c < grupo.size(); c++)
-		{
-			try
-			{
-				this.parceiros.add(new Parceiro (this.grupo.get(c),
-												 receptores.get(c),
-												 transmissores.get(c)));
-			}
-			catch (Exception erro)
-			{} // sei que passei os parametros corretos
-		}
-		
-		// Sorteamos uma palavra
-		palavra = BancoDePalavras.getPalavraSorteada(); 
-		
-		// Instanciamos tracinhos
-		tracinhos = null;
-		try
-		{
-			tracinhos = new Tracinhos (palavra.getTamanho());
-        }
-        catch (Exception erro)
-        {}
-        
-        // Instanciamos um controlador de letras já digitadas
-        controladorDeLetrasJaDigitadas = new ControladorDeLetrasJaDigitadas ();
+        // sorteamos uma palavra da classe BancoDePalavras
+        this.palavra = BancoDePalavras.getPalavraSorteada();
 
-		// será que a gente faz um controlador de erros? mesmo que n influencie muito no jogo
-        
+        // instanciamos um Tracinhos passando o tamanho da palavra sorteada como parâmetro
         try
         {
-            synchronized (this.usuarios)
-            {
-                for (int c = 0; c < grupo.size(); c++)
-				{
-					try
-					{
-						this.usuarios.add(parceiros.get(c));
-					}
-					catch (Exception erro)
-					{} // sei que passei os parametros corretos
-				}
-            }
-
-
-			// COMUNICADOS DO CLIENTE
-			/* PEDIDO PARA SAIR               -> FEITO (?) - FALTA TESTAR
-			 * COMUNICADO CHUTE DE LETRA      
-			 * COMUNICADO CHUTE DE PALAVRA    -> FEITO (?) - FALTA TESTAR
-			 */
-			// COMUNICADOS DO SERVIDOR (NESSA TAREFA SUPERVISORA)
-			/*
-			 * COMUNICADO DE ERRO                       
-			 * COMUNICADO DE ACERTO            
-			 * COMUNICADO DE VITÓRIA          -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
-			 * COMUNICADO DE DERROTA          -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
-			 * COMUNICADO TRACINHOS           -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
-			 * COMUNICADO LETRAS JA DIGITADAS -> FEITO - TEM QUE PROGRAMAR OQ ELE FAZ NO CLIENTE
-			 */
-				 
-            for(;;)
-            {
-				for (int c = 0; c < parceiros.size(); c++)
-				{
-					for (int c2 = 0; c2 < parceiros.size(); c2++)
-					{
-						this.parceiros.get(c2).receba (new ComunicadoTracinhos (this.tracinhos));
-						this.parceiros.get(c2).receba (new ComunicadoLetrasJaDigitadas (this.controladorDeLetrasJaDigitadas));
-					}
-					
-					Comunicado comunicado = this.parceiros.get(c).envie ();
-
-					if (comunicado==null)
-						return;
-					else if (comunicado instanceof ChuteDeLetra)
-					{
-						// acho que tem que melhorar o nome desse comunicado kkkkkkk
-						ChuteDeLetra chuteDeLetra = (ChuteDeLetra)comunicado;
-					
-						// aqui tem que pegar a letra que o usuário chutou
-						// e ver se ela existe na palavra, se não existir
-						// passa a vez pro próximo usuário; se existir,
-						// atualiza tracinhos
-						
-						
-						
-					}
-					else if (comunicado instanceof ChuteDePalavra)
-					{
-						ChuteDePalavra chuteDePalavra = (ChuteDePalavra)comunicado;
-						
-						// aqui tem que ver se a palavra é igual a palavra chutada
-						// pelo usuário, se for, ele ganha o jogo e os outros dois
-						// perdem (acabar a conexão com todos e enviar comunicados de
-						// vitória e derrotas). Se não for, ele perde o jogo e os 
-					    // outros dois continuam (acabar a conexão com o usuário que perdeu)
-					    
-					    // se for fazer assim, o comunicado de chuteDePalavra tem que conter
-					    // a palavra que o usuário chutou
-					    if (chuteDePalavra.getPalavra().equals(palavra))
-					    {
-							parceiros.get(c).receba(new ComunicadoDeVitoria());
-							
-							for (int c3 = parceiros.size()-1; c3 >= 0 ; c3--)
-							{
-								if (parceiros.get(c3) != parceiros.get(c))
-								{
-									parceiros.get(c3).receba(new ComunicadoDeDerrota());
-								}
-								
-								synchronized (this.usuarios)
-								{								
-									this.usuarios.remove (this.parceiros.get(c3));
-								}
-								
-								this.transmissores.remove (this.transmissores.get(c3));
-								this.receptores   .remove (this.receptores.get(c3));
-								this.parceiros.get(c3).adeus();
-								
-								this.parceiros.remove (this.parceiros.get(c3));
-							}							
-						}
-						else
-						{
-							parceiros.get(c).receba(new ComunicadoDeDerrota());
-							
-							synchronized (this.usuarios)
-							{								
-								this.usuarios.remove (this.parceiros.get(c));
-							}
-							
-							this.transmissores.remove (this.transmissores.get(c));
-							this.receptores   .remove (this.receptores.get(c));
-							
-							this.parceiros.get(c).adeus();
-							this.parceiros.remove (this.parceiros.get(c));
-						}
-						
-					}
-					else if (comunicado instanceof PedidoParaSair)
-					{
-						// aqui, se o usuário pedir para sair, vamos acabar 
-						// a conexão com ele.
-						// se ele estiver num grupo de 3, ele sai desse grupo
-						// e os outros dois continuam.
-						// se ele estiver num grupo de 2, ele sai do grupo
-						// e o jogador que restou ganha
-						
-						synchronized (this.usuarios)
-						{
-							this.usuarios.remove (this.parceiros.get(c));
-						}
-						this.transmissores.remove (this.transmissores.get(c)); 
-						this.receptores   .remove (this.receptores.get(c));
-						this.parceiros.get(c).adeus();
-						
-						this.parceiros.remove (this.parceiros.get(c));
-						
-						if (parceiros.size() == 1)
-						{
-							parceiros.get(0).receba (new ComunicadoDeVitoria());
-						}
-					}
-				}
-            }
+            this.tracinhos = new Tracinhos(palavra.getTamanho());
         }
-        catch (Exception erro)
+        catch (Exception erro) {}
+
+        // instanciamos um controlador de letras já digitadas
+        this.controladorDeLetrasJaDigitadas = new ControladorDeLetrasJaDigitadas();
+
+        // percorremos o ArrayList this.grupo
+        for (int i = 0; i < this.grupo.size(); i++)
         {
             try
             {
-				for (int c = parceiros.size()-1; c >= 0; c--)
-				{
-					transmissores.get(c).close ();
-					receptores   .get(c).close ();
-				}
+                // enviamos comunicados que avisam que o jogo começou para todos os jogadores
+                this.grupo.get(i).receba(new ComunicadoInicioDoJogo(this.palavra));
             }
-            catch (Exception falha)
-            {} // so tentando fechar antes de acabar a thread
+            catch (Exception erro) // caso haja algum erro de transmissão
+            {
+                synchronized (this.usuarios)
+                {
+                    // removemos o jogador do array de usuarios
+                    this.usuarios.remove(this.grupo.get(i));
+                }
+
+                try
+                {
+                    // encerramos a conexão com ele
+                    this.grupo.get(i).adeus();
+                }
+                catch (Exception erroDeDesconexao) {}
+
+                synchronized (this.grupo)
+                {
+                    // removemos o jogador do array do grupo
+                    this.grupo.remove(this.grupo.get(i));
+                }
+
+                // se i é diferente de 2, nós subtraimos 1 de i
+                // isso para que todos os jogadores recebam o comunicado,
+                // já que o array list foi rearranjado quando um jogador foi excluido
+                if (i != 2) i--;
+
+                continue; // voltamos para o for
+            }
+        }
+
+        try
+        {
+            // Declaramos e instanciamos um ComunicadoInfosDoJogo, passando os dados do jogo como parâmetro
+            ComunicadoInfosDoJogo infosDoJogo =
+            new ComunicadoInfosDoJogo(this.controladorDeLetrasJaDigitadas,this.tracinhos);
+
+            // Instanciamos um ComunicadoAtualizacoes
+            ComunicadoAtualizacoes atualizacoes = new ComunicadoAtualizacoes();
+
+            // variável que guardará qual a posição do jogador que foi excluido do vetor grupo
+            int posicaoDeExclusao = -1;
+
+            // variável que guardará qual a posição do jogador da vez no vetor grupo
+            int jogadorAtual = 0;
+
+            // variável que guardará qual a posição, no vetor de ações, da ação realizada pelo jogador da vez
+            int acao = -1;
+
+            // variável que guardará qual a posição do resultado, no vetor de resultados, da ação realizada pelo jogador da vez
+            int resultado = -1;
+
+            for (;;)
+            {
+                // definimos o jogador da vez, pegando o parceiro na posição do jogadorAtual no grupo
+                Parceiro jogadorDaVez = grupo.get(jogadorAtual);
+
+                // setamos o jogador da vez no comunicado de atualizações, passando o jogadorAtual como parâmetro
+                atualizacoes.setJogador(jogadorAtual);
+
+                // o jogador da vez recebe um comunicado com as informações do jogo
+                try
+                {
+                    jogadorDaVez.receba(new ComunicadoInfosDoJogo(infosDoJogo));
+                }
+                catch (Exception erro) {} // erro de comunicação
+
+                // Jogador da vez recebe um ComunicadoSuaVez
+                jogadorDaVez.receba(new ComunicadoSuaVez());
+
+                // Aguardamos um comunicado vindo do jogador da vez
+                Comunicado comunicado = jogadorDaVez.envie();
+
+                if (comunicado == null)
+                    return;
+                // Se o jogador da vez chutar uma letra
+                else if (comunicado instanceof ChuteDeLetra)
+                {
+                    // A ação recebe 0 (chute de letra)
+                    acao = 0;
+
+                    // O comunicado vindo do cliente é um comunicado de ChuteDeLetra
+                    ChuteDeLetra chuteDeLetra = (ChuteDeLetra) comunicado;
+
+                    // a variável recebe essa letra que foi chutada
+                    char letra = chuteDeLetra.getLetra();
+
+                    // Registramos a letra no controlador de letras já digitadas
+                    // (já verificamos que a letra não foi digitada antes no cliente)
+                    this.controladorDeLetrasJaDigitadas.registre(letra);
+
+                    // Vemos quantas vezes a letra digitadas aparece na palavra
+                    int qtd = this.palavra.getQuantidade(letra);
+
+                    // caso não exista na palavra
+                    if (qtd == 0)
+                    {
+                        // O jogador da vez recebe um comunicado de erro
+                        jogadorDaVez.receba(new ComunicadoDeErro());
+                        // O resultado da ação do jogador é igual a 0, ou seja, errou
+                        resultado = 0;
+                    }
+
+                    else
+                    {
+                        // O resultado da ação é igual a 1, ou seja, acertou
+                        resultado = 1;
+
+                        // Revelamos a letra em tracinhos
+                        for (int c = 0; c < qtd; c++)
+                        {
+                            int posicao = this.palavra.getPosicaoDaIezimaOcorrencia(c, letra);
+                                this.tracinhos.revele(posicao, letra);
+                        }
+
+                        // Se tracinhos ainda está com tracinhos
+                        if (this.tracinhos.isAindaComTracinhos())
+                            // O jogador da vez recebe um comunicado de acerto
+                            jogadorDaVez.receba(new ComunicadoDeAcerto());
+                        else // Se a palavra foi completada
+                        {
+                            // Para cada jogador no grupo
+                            for (Parceiro jogador : this.grupo)
+                            {
+                                // Se o jogador for o jogador da vez
+                                if (jogador == jogadorDaVez)
+                                {
+                                    // Recebe um comunicado de vitória
+                                    jogador.receba(new ComunicadoDeVitoria());
+                                }
+                                else // Se não (todos os outros jogadores do grupo)
+                                {
+                                    // Setamos a ação e o resultado da ação do jogador
+                                    atualizacoes.setAcao(acao);
+                                    atualizacoes.setResultado(resultado);
+                                    // Enviamos uma cópia do comunicado de atualizações
+                                    jogador.receba(new ComunicadoAtualizacoes(atualizacoes));
+
+                                    // O jogador recebe um comunicado de derrota
+                                    jogador.receba(new ComunicadoDeDerrota());
+                                }
+
+                                // Removemos o jogador de usuarios (independentemente de ter ganhado ou perdido)
+                                synchronized (this.usuarios)
+                                {
+                                    this.usuarios.remove(jogador);
+                                }
+
+                                // Fechamos a conexão com o jogador (independentemente de ter ganhado ou perdido)
+                                try
+                                {
+                                    jogador.adeus();
+                                }
+                                catch (Exception erroDeDesconexao) {}
+                            }
+
+                            break; // Saimos do for infinito, terminando a execução da supervisora
+                        }
+                    }
+                }
+                // Se o jogador da vez chutar uma palavra
+                else if (comunicado instanceof ChuteDePalavra)
+                {
+                    // A ação recebe 1 (chute de palavra)
+                    acao = 1;
+
+                    // O comunicado vindo do cliente é um comunicado de ChuteDePalavra
+                    ChuteDePalavra chuteDePalavra = (ChuteDePalavra) comunicado;
+
+                    // uma string recebe a palavra digitada pelo cliente
+                    String palavraDigitada = chuteDePalavra.getPalavra();
+
+                    // Se a palavra digitada pelo cliente for igual a palavra sorteada
+                    if (palavraDigitada.equals(this.palavra.toString()))
+                    {
+                        // O jogador acertou a palavra
+
+                        // O resultado da ação do jogador é igual a 1, ou seja, acertou
+                        resultado = 1;
+
+                        // Para cada parceiro do grupo
+                        for (Parceiro jogador : this.grupo)
+                        {
+                            // Se o parceiro é o jogador da vez
+                            if (jogador == jogadorDaVez)
+                            {
+                                // Recebe um comunicado de vitória
+                                jogador.receba(new ComunicadoDeVitoria());
+                            }
+                            else // Se não (qualquer outro jogador do grupo)
+                            {
+                                // Setamos a ação e o resultado da ação do jogador da vez
+                                atualizacoes.setAcao(acao);
+                                atualizacoes.setResultado(resultado);
+                                // Enviamos uma cópia do comunicado de atualizações
+                                jogador.receba(new ComunicadoAtualizacoes(atualizacoes));
+
+                                // O jogador recebe um comunicado de derrota
+                                jogador.receba(new ComunicadoDeDerrota());
+                            }
+
+                            // Removemos o jogador dos usuarios (independentemente de ter ganhado ou perdido)
+                            synchronized (this.usuarios)
+                            {
+
+                                this.usuarios.remove(jogador);
+                            }
+
+                            // Fechamos a conexão com ele (independentemente de ter ganhado ou perdido)
+                            try
+                            {
+                                jogador.adeus();
+                            }
+                            catch (Exception erroDeDesconexao) {}
+                        }
+
+                        break; // Saimos do for infinito, terminando a execução da supervisora
+                    }
+                    else // caso o jogador tenha errado o chute de palavra
+                    {
+                        // O resultado da sua ação recebe 0, ou seja, errou
+                        resultado = 0;
+
+                        // Se o grupo tiver apenas dois jogadores
+                        if (grupo.size() == 2)
+                        {
+                            // Para cada parceiro presente no grupo
+                            for (Parceiro jogador : this.grupo)
+                            {
+                                // Se o parceiro for o jogador da vez
+                                if (jogador == jogadorDaVez)
+                                {
+                                    // Recebe um comunicado de derrota
+                                    jogador.receba(new ComunicadoDeDerrota());
+                                }
+                                else // Se não (é o outro jogador do grupo)
+                                {
+                                    // Setamos a ação e o resultado dessa ação do jogador da vez
+                                    atualizacoes.setAcao(acao);
+                                    atualizacoes.setResultado(resultado);
+                                    // Enviamos uma cópia do comunicado de atualizações para o jogador
+                                    jogador.receba(new ComunicadoAtualizacoes(atualizacoes));
+
+                                    // Enviamos um comunicado de vitória para o jogador
+                                    jogador.receba(new ComunicadoDeVitoria());
+                                }
+
+                                // Removemos o jogador de usuários, indepentemente de ter ganhado ou perdido
+                                synchronized (this.usuarios)
+                                {
+                                    this.usuarios.remove(jogador);
+                                }
+
+                                // Fechamos a conexão com ele, indepentemente dele ter ganhado ou perdido
+                                try
+                                {
+                                    jogador.adeus();
+                                }
+                                catch (Exception erroDeDesconexao)
+                                {}
+                            }
+
+                            break; // Saimos do for infinito, terminando a execução da supervisora
+                        }
+                        else // Se o grupo estiver completo com os três jogadores
+                        {
+                            // O jogador da vez perde, assim recebendo um comunicado de derrota
+                            // e os outros dois jogadores continuam o jogo
+                            jogadorDaVez.receba(new ComunicadoDeDerrota());
+
+                            synchronized (this.usuarios)
+                            {
+                                // removemos o jogador da vez dos usuários
+                                this.usuarios.remove(jogadorDaVez);
+                            }
+
+                            try
+                            {
+                                // e fechamos a conexão com ele
+                                jogadorDaVez.adeus();
+                            }
+                            catch (Exception erroDeDesconexao) {}
+
+                            // o removemos também do grupo
+                            this.grupo.remove(jogadorDaVez);
+
+                            // A posição de exclusão recebe o indice do jogador atual
+                            posicaoDeExclusao = jogadorAtual;
+                        }
+                    }
+                }
+                // Se o jogador pediu para sair
+                else if (comunicado instanceof PedidoParaSair)
+                {
+                    // A ação recebe 2 (saiu do jogo)
+                    acao = 2;
+
+                    synchronized (this.usuarios)
+                    {
+                        // removemos o jodador da vez dos usuários
+                        this.usuarios.remove(jogadorDaVez);
+                    }
+
+                    // o removemos também do grupo
+                    this.grupo.remove(jogadorDaVez);
+
+                    try
+                    {
+                        // e fechamos a conexão com o mesmo
+                        jogadorDaVez.adeus();
+                    }
+                    catch (Exception erroDeDesconexao) {}
+
+                    // caso o tamanho do grupo seja == 1, ou seja, só resta um jogador
+                    if (this.grupo.size() == 1)
+                    {
+                        // Setamos a ação do jogador da vez, e o resultado dessa ação
+                        atualizacoes.setAcao(acao);
+                        atualizacoes.setResultado(resultado);
+                        // Enviamos uma cópia do comunicado de atualizações para o jogador que sobrou
+                        this.grupo.get(0).receba(new ComunicadoAtualizacoes(atualizacoes));
+
+                        // Esse jogador recebe o comunicado de vitória
+                        this.grupo.get(0).receba(new ComunicadoDeVitoria());
+
+                        synchronized (this.usuarios)
+                        {
+                            // é retirado do grupo
+                            this.usuarios.remove(this.grupo.get(0));
+                        }
+
+                        try
+                        {
+                            // e a conexão com ele é fechada
+                            this.grupo.get(0).adeus();
+                        }
+                        catch (Exception erroDeDesconexao) {}
+
+                        // finalizamos o jogo
+                        break;
+                    }
+
+                    // Se o jogo não foi finalizado, a posição de exclusão recebe a posição do jogador atual,
+                    // indicando que ele foi excluido do grupo
+                    posicaoDeExclusao = jogadorAtual;
+                }
+
+                // Mandamos um comunicado de atualizações do jogo para o cliente
+
+                atualizacoes.setJogador(jogadorAtual);    // indicamos qual é o jogador da vez
+                atualizacoes.setAcao(acao);               // indicamos o que ele fez nessa rodada
+                if (resultado != -1)                      // se ele chutou uma palavra/letra
+                {
+                    atualizacoes.setResultado(resultado); // indicamos qual foi o resultado (errou/acertou)
+                    resultado = -1;
+                }
+
+                // Mandamos uma cópia do comunicado de atualizacoes para todos os parceiros,
+                // menos o jogador atual
+                for (Parceiro jogador : this.grupo)
+                {
+                    if (jogador != jogadorDaVez)
+                    {
+                        jogador.receba(new ComunicadoAtualizacoes(atualizacoes));
+                    }
+                }
+
+                // Aqui definimos o próximo jogador
+
+                // Se a posição de exclusão for != 1, quer dizer que um jogador foi excluido do grupo
+                // e o array list foi rearranjado
+                if (posicaoDeExclusao != -1)
+                {
+                    // Por isso, o próximo jogador, que estava à direita do jogador que foi excluido
+                    // no array list grupo ([],[],[]) passa a ocupar o lugar desse jogador
+                    // (todos os jogadores que estavam à direita, vão uma "casinha" para a esquerda)
+                    // então, o jogador atual está no indice da posição de exclusão
+                    jogadorAtual = posicaoDeExclusao;
+                }
+                else // nenhum jogador foi excluido
+                    jogadorAtual++; // passamos para o próximo jogador
+
+                // se o jogador atual ultrapassou o tamanho do grupo, ele volta a ser o primeiro jogador
+                if (jogadorAtual >= grupo.size()) jogadorAtual = 0;
+            }
+        }
+        catch (Exception erro)
+        {
+            // percorremos o array retirando todos os usuários
+            for (int i = 0; i < this.grupo.size(); i++)
+            {
+                synchronized (this.usuarios)
+                {
+                    this.usuarios.remove(this.grupo.get(i));
+                }
+            }
+
+            // e fechando as conexões com todos eles
+            try
+            {
+                for (int i = 0; i < this.grupo.size(); i++)
+                {
+                    this.grupo.get(i).adeus();
+                }
+            }
+            catch (Exception erroDeDesconexao) {}
 
             return;
         }

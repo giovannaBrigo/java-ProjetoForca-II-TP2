@@ -1,11 +1,17 @@
+// Danyelle Nogueira França 21232
+// Julia Flausino da Silva 21241
+// Giovanna do Amaral Brigo 21685
+// Maria Julia Hofstetter Trevisan Pereira 21250
+
+package br.unicamp.cotuca.tp2mat2021.projetofinal;
 import java.io.*;
 
 public class Teclado
 {
     private static BufferedReader teclado =
-                   new BufferedReader (
-                   new InputStreamReader (
-                   System.in));
+            new BufferedReader (
+                    new InputStreamReader (
+                            System.in));
 
     public static String getUmString ()
     {
@@ -38,7 +44,7 @@ public class Teclado
 
         return ret;
     }
- 
+
     public static short getUmShort () throws Exception
     {
         short ret=(short)0;
@@ -77,8 +83,8 @@ public class Teclado
 
     public static long getUmLong () throws Exception
     {
-      //long ret=(long)0;
-      //long ret=0;
+        //long ret=(long)0;
+        //long ret=0;
         long ret=0L;
 
         try
@@ -97,8 +103,8 @@ public class Teclado
 
     public static float getUmFloat () throws Exception
     {
-      //float ret=0;
-      //float ret=(float)0.0;
+        //float ret=0;
+        //float ret=(float)0.0;
         float ret=0.0F;
 
         try
@@ -117,9 +123,9 @@ public class Teclado
 
     public static double getUmDouble () throws Exception
     {
-      //double ret=0;
-      //double ret=(long)0;
-      //double ret=0L;
+        //double ret=0;
+        //double ret=(long)0;
+        //double ret=0L;
         double ret=0.0;
 
         try
@@ -150,7 +156,7 @@ public class Teclado
             if (str.length() != 1)
                 throw new Exception ("Char invalido!");
 
-             ret = str.charAt(0);
+            ret = str.charAt(0);
         }
         catch (IOException erro)
         {} // sei que nao vai dar erro
