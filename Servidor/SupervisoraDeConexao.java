@@ -440,6 +440,7 @@ public class SupervisoraDeConexao extends Thread
                     // (todos os jogadores que estavam à direita, vão uma "casinha" para a esquerda)
                     // então, o jogador atual está no indice da posição de exclusão
                     jogadorAtual = posicaoDeExclusao;
+                    posicaoDeExclusao = -1;
                 }
                 else // nenhum jogador foi excluido
                     jogadorAtual++; // passamos para o próximo jogador
